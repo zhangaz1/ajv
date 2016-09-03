@@ -115,33 +115,68 @@
     {{ $closingBraces2 += '}'; }}
   {{?}}
 {{??}}
-  {{~ it.RULES:$rulesGroup }}
-    {{? $shouldUseGroup($rulesGroup) }}
-      {{? $rulesGroup.type }}
-        if ({{= it.util.checkDataType($rulesGroup.type, $data) }}) {
+  {{
+    var $groups = {};
+    var $types = [];
+    for (var $keyword in it.schema) {
+      var $rule = it.RULES.all[$keyword];
+      if (!$rule ||
+          ($keyword == 'additionalProperties' &&
+           it.schema.additionalProperties == true)) continue;
+      if (typeof $rule == 'string') $rule = it.RULES.all[$rule];
+      if (typeof $rule == 'object') {
+        var $type = $rule.type || '';
+        var $group = $groups[$type];
+        if (!$group) {
+          $group = $groups[$type] = [];
+          $types.push($type);
+        }
+        $group.push($rule);
+      }
+    }
+
+    for (var $type in $groups) {
+      $groups[$type].sort(function (r1, r2) {
+        if (r1.order > r2.order) return 1;
+        return -1;
+      });
+    }
+
+    $types.sort(function (t1, t2) {
+      if (it.RULES.typeOrder[t1] > it.RULES.typeOrder[t2]) return 1;
+      return -1;
+    });
+
+    /*console.log('****', $groups, $types);*/
+  }}
+
+  {{~ $types:$type }}
+      {{ var $rulesGroup = $groups[$type || '']; }}
+      {{? $type }}
+        if ({{= it.util.checkDataType($type, $data) }}) {
       {{?}}
         {{? it.opts.useDefaults && !it.compositeRule }}
-          {{? $rulesGroup.type == 'object' && it.schema.properties }}
+          {{? $type == 'object' && it.schema.properties }}
             {{# def.defaultProperties }}
-          {{?? $rulesGroup.type == 'array' && Array.isArray(it.schema.items) }}
+          {{?? $type == 'array' && Array.isArray(it.schema.items) }}
             {{# def.defaultItems }}
           {{?}}
         {{?}}
-        {{~ $rulesGroup.rules:$rule }}
-          {{? $shouldUseRule($rule) }}
+        {{~ $rulesGroup:$rule }}
+
             {{= $rule.code(it, $rule.keyword) }}
             {{? $breakOnError }}
               {{ $closingBraces1 += '}'; }}
             {{?}}
-          {{?}}
+
         {{~}}
         {{? $breakOnError }}
           {{= $closingBraces1 }}
           {{ $closingBraces1 = ''; }}
         {{?}}
-      {{? $rulesGroup.type }}
+      {{? $type }}
         }
-        {{? $typeSchema && $typeSchema === $rulesGroup.type }}
+        {{? $typeSchema && $typeSchema === $type }}
           {{ var $typeChecked = true; }}
           else {
             {{
@@ -157,7 +192,7 @@
         if (errors === {{?$top}}0{{??}}errs_{{=$lvl}}{{?}}) {
         {{ $closingBraces2 += '}'; }}
       {{?}}
-    {{?}}
+
   {{~}}
 {{?}}
 

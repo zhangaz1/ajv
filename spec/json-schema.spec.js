@@ -5,7 +5,7 @@ var jsonSchemaTest = require('json-schema-test')
   , options = require('./ajv_options')
   , should = require('./chai').should();
 
-var instances = getAjvInstances(options);
+var instances = getAjvInstances(options, { beautify: true });
 
 var remoteRefs = {
   // for JSON-Schema-Test-Suite
