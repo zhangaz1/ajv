@@ -16,6 +16,8 @@
     "eslint": "if-node-version '>=4' eslint lib/*.js lib/compile/*.js spec",
     "test-spec": "mocha spec/*.spec.js -R spec",
     "test-fast": "AJV_FAST_TEST=true npm run test-spec",
+    "test-pack": "AJV_PACK=true npm run test-spec",
+    "test-pack-fast": "AJV_PACK=true AJV_FAST_TEST=true npm run test-spec",
     "test-debug": "mocha spec/*.spec.js --debug-brk -R spec",
     "test-cov": "istanbul cover -x '**/spec/**' node_modules/mocha/bin/_mocha -- spec/*.spec.js -R spec",
     "test-ts": "tsc --target ES5 --noImplicitAny lib/ajv.d.ts",
@@ -56,6 +58,7 @@
     "json-stable-stringify": "^1.0.1"
   },
   "devDependencies": {
+    "ajv-pack": "^0.1.0",
     "bluebird": "^3.1.5",
     "brfs": "^1.4.3",
     "browserify": "^13.0.0",
