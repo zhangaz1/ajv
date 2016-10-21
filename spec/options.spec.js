@@ -973,4 +973,32 @@ describe('Ajv Options', function () {
       });
     });
   });
+
+
+  describe('bindMethods', function() {
+    describe('= true', function() {
+      it('should be possible to call method as a function', function() {
+        var ajv = new Ajv({bindMethods: true});
+        var v = ajv.validate;
+
+        v({ type: 'string' }, 'foo') .should.equal(true);
+        v({ type: 'string' }, 1) .should.equal(false);
+      });
+    });
+
+    describe('= false (default)', function() {
+      it('should NOT be possible to call method as a function', function() {
+        test(new Ajv({bindMethods: false}));
+        test(new Ajv);
+
+        function test(ajv) {
+          var v = ajv.validate;
+          ajv.validate({ type: 'string' }, 'foo') .should.equal(true);
+          should.throw(function () {
+            v({ type: 'string' }, 'foo');
+          });
+        }
+      });
+    });
+  });
 });
