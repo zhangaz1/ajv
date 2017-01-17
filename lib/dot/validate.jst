@@ -28,7 +28,7 @@
     }}
   {{?}}
 
-  var validate =
+  {{? !it.opts.sourceMap }}var{{?}} validate =
     {{? $async }}
       {{? $es7 }}
         (async function
@@ -40,9 +40,6 @@
     {{?}}
         (data, dataPath, parentData, parentDataProperty, rootData) {
           'use strict';
-          {{? it.schema.id && (it.opts.sourceCode || it.opts.processCode) }}
-            {{= '/\*# sourceURL=' + it.schema.id + ' */' }}
-          {{?}}
 {{?}}
 
 {{? typeof it.schema == 'boolean' || !($refKeywords || it.schema.$ref) }}
@@ -125,6 +122,7 @@
       , $method = $typeIsArray ? 'checkDataTypes' : 'checkDataType';
   }}
 
+  {{# def.sourceMap:'type' }}
   if ({{= it.util[$method]($typeSchema, $data, true) }}) {
 #}}
 
@@ -162,6 +160,7 @@
   {{~ it.RULES:$rulesGroup }}
     {{? $shouldUseGroup($rulesGroup) }}
       {{? $rulesGroup.type }}
+        {{# def.sourceMap:'type' }}
         if ({{= it.util.checkDataType($rulesGroup.type, $data) }}) {
       {{?}}
         {{? it.opts.useDefaults && !it.compositeRule }}
@@ -173,8 +172,12 @@
         {{?}}
         {{~ $rulesGroup.rules:$rule }}
           {{? $shouldUseRule($rule) }}
-            {{ var $code = $rule.code(it, $rule.keyword); }}
+            {{
+              var $keyword = $rule.keyword
+                , $code = $rule.code(it, $keyword);
+            }}
             {{? $code }}
+              {{# def.sourceMap:$keyword }}
               {{= $code }}
               {{? $breakOnError }}
                 {{ $closingBraces1 += '}'; }}
@@ -191,6 +194,7 @@
         {{? $typeSchema && $typeSchema === $rulesGroup.type }}
           {{ var $typeChecked = true; }}
           else {
+            {{# def.sourceMap:'type' }}
             {{
               var $schemaPath = it.schemaPath + '.type'
                 , $errSchemaPath = it.errSchemaPath + '/type';
@@ -226,7 +230,7 @@
     {{?}}
   });
 
-  return validate;
+  {{? !it.opts.sourceMap }}return validate;{{?}}
 {{??}}
   var {{=$valid}} = errors === errs_{{=$lvl}};
 {{?}}

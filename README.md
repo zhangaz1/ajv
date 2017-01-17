@@ -1092,9 +1092,15 @@ Defaults:
 - _errorDataPath_: set `dataPath` to point to 'object' (default) or to 'property' when validating keywords `required`, `additionalProperties` and `dependencies`.
 - _messages_: Include human-readable messages in errors. `true` by default. `false` can be passed when custom messages are used (e.g. with [ajv-i18n](https://github.com/epoberezkin/ajv-i18n)).
 - _sourceCode_: add `sourceCode` property to validating function (for debugging; this code can be different from the result of toString call).
-- _processCode_: an optional function to process generated code before it is passed to Function constructor. It can be used to either beautify (the validating function is generated without line-breaks) or to transpile code. Starting from version 5.0.0 this option replaced options:
-  - `beautify` that formatted the generated function using [js-beautify](https://github.com/beautify-web/js-beautify). If you want to beautify the generated code pass `require('js-beautify').js_beautify`.
-  - `transpile` that transpiled asynchronous validation function. You can still use `transpile` option with [ajv-async](https://github.com/epoberezkin/ajv-async) package. See [Asynchronous validation](#asynchronous-validation) for more information. 
+- _processCode_: an optional function to process generated code before it is passed to Function constructor. The function receives two parameters: code (as string) and [schema compilation context](https://github.com/epoberezkin/ajv/blob/master/CUSTOM.md#schema-compilation-context) (it). It can be used to either beautify (the validating function is generated without line-breaks) or to transpile code. Starting from version 5.0.0 this option replaced options:
+  - `beautify` that formatted the generated function using [js-beautify](https://github.com/beautify-web/js-beautify). If you want to beautify the generated code pass function that calls `require('js-beautify').js_beautify`:
+
+  ```javascript
+  var beautify = require('js-beautify').js_beautify;
+  var ajv = new Ajv({ processCode: (code, it) => beautify(code) });
+  ```
+
+  - `transpile` that transpiled asynchronous validation function. You can still use `transpile` option with [ajv-async](https://github.com/epoberezkin/ajv-async) package. See [Asynchronous validation](#asynchronous-validation) for more information.
 - _cache_: an optional instance of cache to store compiled schemas using stable-stringified schema as a key. For example, set-associative cache [sacjs](https://github.com/epoberezkin/sacjs) can be used. If not passed then a simple hash is used which is good enough for the common use case (a limited number of statically defined schemas). Cache should have methods `put(key, value)`, `get(key)`, `del(key)` and `clear()`.
 
 
