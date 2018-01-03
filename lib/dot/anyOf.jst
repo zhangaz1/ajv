@@ -4,30 +4,36 @@
 {{# def.setupNextLevel }}
 
 {{
-  var $noEmptySchema = $schema.every(function($sch) {
+  var $shortCircuit = it.opts.shortCircuit === undefined ? $breakOnError : it.opts.shortCircuit
+    , $noEmptySchema = $schema.every($nonEmptySchema)
+    , $someNonEmptySchemas = $noEmptySchema || $schema.some($nonEmptySchema);
+
+  function $nonEmptySchema($sch) {
     return {{# def.nonEmptySchema:$sch }};
-  });
+  }
 }}
-{{? $noEmptySchema }}
+{{? $shortCircuit ? $noEmptySchema : $someNonEmptySchemas }}
   {{ var $currentBaseId = $it.baseId; }}
   var {{=$errs}} = errors;
-  var {{=$valid}} = false;
+  var {{=$valid}} = {{= !$noEmptySchema }};
 
   {{# def.setCompositeRule }}
 
   {{~ $schema:$sch:$i }}
-    {{
-      $it.schema = $sch;
-      $it.schemaPath = $schemaPath + '[' + $i + ']';
-      $it.errSchemaPath = $errSchemaPath + '/' + $i;
-    }}
+    {{? $shortCircuit || {{# def.nonEmptySchema:$sch }} }}
+      {{
+        $it.schema = $sch;
+        $it.schemaPath = $schemaPath + '[' + $i + ']';
+        $it.errSchemaPath = $errSchemaPath + '/' + $i;
+      }}
 
-    {{# def.insertSubschemaCode }}
+      {{# def.insertSubschemaCode }}
 
-    {{=$valid}} = {{=$valid}} || {{=$nextValid}};
+      {{=$valid}} = {{=$valid}} || {{=$nextValid}};
 
-    if (!{{=$valid}}) {
-    {{ $closingBraces += '}'; }}
+      if (!{{=$valid}}) {
+      {{ $closingBraces += '}'; }}
+    {{?}}
   {{~}}
 
   {{# def.resetCompositeRule }}
