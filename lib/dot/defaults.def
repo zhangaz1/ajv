@@ -1,15 +1,21 @@
 {{## def.assignDefault:
-  if ({{=$passData}} === undefined
-    {{? it.opts.useDefaults == 'empty' }}
-      || {{=$passData}} === null
-      || {{=$passData}} === ''
+  {{? it.compositeRule }}
+    {{? it.opts.ignoredDefaults }}
+      {{ it.logger.warn('default is ignored for: ' + $passData); }}
     {{?}}
-  )
-    {{=$passData}} = {{? it.opts.useDefaults == 'shared' }}
-                       {{= it.useDefault($sch.default) }}
-                     {{??}}
-                       {{= JSON.stringify($sch.default) }}
-                     {{?}};
+  {{??}}
+    if ({{=$passData}} === undefined
+      {{? it.opts.useDefaults == 'empty' }}
+        || {{=$passData}} === null
+        || {{=$passData}} === ''
+      {{?}}
+    )
+      {{=$passData}} = {{? it.opts.useDefaults == 'shared' }}
+                         {{= it.useDefault($sch.default) }}
+                       {{??}}
+                         {{= JSON.stringify($sch.default) }}
+                       {{?}};
+  {{?}}
 #}}
 
 
