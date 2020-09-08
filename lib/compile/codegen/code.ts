@@ -1,9 +1,5 @@
 type TemplateArg = SafeExpr | string
 
-export type Code = _Code | Name
-
-export type SafeExpr = Code | number | boolean | null
-
 export function _(strs: TemplateStringsArray, ...args: TemplateArg[]): _Code {
   // TODO benchmark if loop is faster than reduce
   // let res = strs[0]
@@ -74,6 +70,10 @@ export class Name extends _Code {
     throw new Error("CodeGen: can't add to Name")
   }
 }
+
+export type Code = _Code | Name
+
+export type SafeExpr = Code | number | boolean | null
 
 export const nil = new _Code("")
 
